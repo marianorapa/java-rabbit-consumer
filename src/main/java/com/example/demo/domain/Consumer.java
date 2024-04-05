@@ -14,7 +14,7 @@ import java.util.concurrent.TimeoutException;
 @Service
 public class Consumer {
 
-    private final static String EXCHANGE_NAME = "logs-direct";
+    private final static String EXCHANGE_NAME = "logs-topic";
 
     @Value("${spring.rabbitmq.host}")
     private String rabbitHost;
@@ -25,10 +25,11 @@ public class Consumer {
             Connection connection = factory.newConnection();
             Channel channel = connection.createChannel();
 
-            channel.exchangeDeclare(EXCHANGE_NAME, "direct");
+            channel.exchangeDeclare(EXCHANGE_NAME, "topic");
             String queueName = channel.queueDeclare().getQueue();
-            channel.queueBind(queueName, EXCHANGE_NAME, "critical"); // Update to different topic on rebuild
-            System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+            String topic = "*.cron.#"; // Update to different topic on rebuild
+            channel.queueBind(queueName, EXCHANGE_NAME, topic);
+            System.out.println(" [*] Waiting for messages to " + topic + " To exit press CTRL+C");
 
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
