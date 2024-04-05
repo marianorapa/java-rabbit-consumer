@@ -31,13 +31,25 @@ public class Consumer {
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
                 System.out.println(" [x] Received '" + message + "'");
+                try {
+                    doWork(message);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println(" [x] Done");
+                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             };
-            channel.basicConsume(QUEUE_NAME, true, deliverCallback, consumerTag -> { });
+            channel.basicConsume(QUEUE_NAME, false, deliverCallback, consumerTag -> { });
         } catch (IOException | TimeoutException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private void doWork(String task) throws InterruptedException {
+        for (char ch: task.toCharArray()) {
+            Thread.sleep(1000);
+        }
+    }
     private ConnectionFactory getConnectionFactory() {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(rabbitHost);
