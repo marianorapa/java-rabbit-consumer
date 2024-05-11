@@ -19,6 +19,13 @@ public class Consumer {
     @Value("${spring.rabbitmq.host}")
     private String rabbitHost;
 
+    @Value("${spring.rabbitmq.user}")
+    private String rabbitUser;
+
+    @Value("${spring.rabbitmq.password}")
+    private String rabbitPassword;
+
+
     public void consume() {
         try {
             ConnectionFactory factory = getConnectionFactory();
@@ -45,6 +52,8 @@ public class Consumer {
     private ConnectionFactory getConnectionFactory() {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(rabbitHost);
+        factory.setUsername(rabbitUser);
+        factory.setPassword(rabbitPassword);
         return factory;
     }
 }
